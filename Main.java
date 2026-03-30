@@ -1,14 +1,12 @@
-// this is the main file where everything runs
-// we create a cinema hall add movies and then book some seats
+import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        // create cinema hall
+        // 1. Setup Phase: Create cinema hall and add movies
         CinemaHall hall = new CinemaHall("StarPlex Cinema Hall 1");
 
-        // create movies and add show times
         Movie m1 = new Movie("M01", "Interstellar", "Sci-Fi", 8.6, 169);
         m1.addShowTime("10:00 AM");
         m1.addShowTime("2:00 PM");
@@ -24,60 +22,98 @@ public class Main {
         m3.addShowTime("4:00 PM");
         m3.addShowTime("9:00 PM");
 
-        // add movies to hall
         hall.addMovie(m1);
         hall.addMovie(m2);
         hall.addMovie(m3);
 
-        // show movies list
-        hall.showAllMovies();
+        // 2. Interactive Phase: Setup Scanner for user input
+        Scanner scanner = new Scanner(System.in);
+        boolean running = true;
 
-        // show seat layout
-        hall.showAllSeats();
+        System.out.println("==========================================");
+        System.out.println("  Welcome to StarPlex Booking System!     ");
+        System.out.println("==========================================");
 
-        // book some seats
-        System.out.println("--- Making Bookings ---");
-        System.out.println();
+        // 3. The Menu Loop
+        while (running) {
+            System.out.println("\n--- Main Menu ---");
+            System.out.println("1. View all movies");
+            System.out.println("2. View seat layout");
+            System.out.println("3. Book a ticket");
+            System.out.println("4. Cancel a booking");
+            System.out.println("5. View all current bookings");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice (1-6): ");
 
-        Ticket t1 = hall.bookSeat("Ravi Sharma", "M01", "7:30 PM", 3);
-        if (t1 != null) {
-            t1.printTicket();
+            int choice = 0;
+            try {
+                // Read as string and parse to avoid scanner line break issues
+                choice = Integer.parseInt(scanner.nextLine()); 
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a number.");
+                continue;
+            }
+
+            // 4. Handle user choices
+            switch (choice) {
+                case 1:
+                    hall.showAllMovies();
+                    break;
+
+                case 2:
+                    hall.showAllSeats();
+                    break;
+
+                case 3:
+                    System.out.print("Enter Customer Name: ");
+                    String name = scanner.nextLine();
+                    
+                    System.out.print("Enter Movie ID (e.g., M01): ");
+                    String movieId = scanner.nextLine();
+                    
+                    System.out.print("Enter Show Time (e.g., 7:30 PM): ");
+                    String time = scanner.nextLine();
+                    
+                    System.out.print("Enter Seat Number (1-15): ");
+                    int seatNum = 0;
+                    try {
+                        seatNum = Integer.parseInt(scanner.nextLine());
+                        Ticket ticket = hall.bookSeat(name, movieId, time, seatNum);
+                        
+                        if (ticket != null) {
+                            System.out.println("\n*** Ticket Successfully Generated ***");
+                            ticket.printTicket();
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println("Error: Please enter a valid number for the seat.");
+                    }
+                    break;
+
+                case 4:
+                    System.out.print("Enter the Seat Number to Cancel: ");
+                    try {
+                        int cancelSeat = Integer.parseInt(scanner.nextLine());
+                        hall.cancelBooking(cancelSeat);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Error: Please enter a valid number for the seat.");
+                    }
+                    break;
+
+                case 5:
+                    hall.showAllTickets();
+                    break;
+
+                case 6:
+                    running = false;
+                    System.out.println("Thank you for using the StarPlex System. Goodbye!");
+                    break;
+
+                default:
+                    System.out.println("Invalid choice. Please select an option between 1 and 6.");
+            }
         }
-
-        Ticket t2 = hall.bookSeat("Priya Mehta", "M02", "8:00 PM", 14);
-        if (t2 != null) {
-            t2.printTicket();
-        }
-
-        Ticket t3 = hall.bookSeat("Arjun Das", "M03", "9:00 PM", 7);
-        if (t3 != null) {
-            t3.printTicket();
-        }
-
-        // try to book same seat again - this should give error
-        System.out.println("--- Testing Error: booking same seat again ---");
-        hall.bookSeat("Sneha Rao", "M01", "7:30 PM", 3);
-        System.out.println();
-
-        // try wrong show time - this should also give error
-        System.out.println("--- Testing Error: wrong show time ---");
-        hall.bookSeat("Kiran Patel", "M02", "5:00 PM", 8);
-        System.out.println();
-
-        // cancel a booking
-        System.out.println("--- Cancelling Seat 7 ---");
-        hall.cancelBooking(7);
-        System.out.println();
-
-        // try to cancel a seat that was never booked
-        System.out.println("--- Testing Error: cancel seat that is not booked ---");
-        hall.cancelBooking(2);
-        System.out.println();
-
-        // show updated seats after bookings and cancellation
-        hall.showAllSeats();
-
-        // show all tickets
-        hall.showAllTickets();
+        
+        // Close the scanner when exiting the program
+        scanner.close(); 
     }
 }
